@@ -49,16 +49,9 @@
      :b b}))
 
 (comment
-  (example-problem)
-
   (-> (parse-qaplib-problem "qapdata/bur26a.dat")
       )
 
   (java.io/resource "qapdata/bur26a.dat")
-
-  (Integer/parseInt "06")
-
-  (re-seq #"[\d.]+" " 1  2\n\n dupa3 a2d333 44 5  06 ")
-
 
   )
