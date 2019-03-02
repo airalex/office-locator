@@ -8,10 +8,11 @@
   (println "hello!"))
 
 (comment
-  (let [problem (problem/parse-qaplib-problem "qapdata/nug12.dat")
-        solution (sim-anneal/run-2 problem 1000 0.001)
-        cost (solution/cost solution problem)]
-    {:best solution
-     :cost cost})
+  (-> (let [problem (problem/parse-qaplib-problem "qapdata/nug20.dat")
+            solution (sim-anneal/run problem 1000 0.001)
+            cost (solution/cost solution problem)]
+        {:best solution
+         :cost cost})
+      (println))
 
   )
