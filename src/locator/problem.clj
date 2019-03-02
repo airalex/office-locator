@@ -1,4 +1,6 @@
-(ns locator.problem)
+(ns locator.problem
+  (:require [clojure.java.io :as java.io]
+             [clojure.string :as str]))
 
 
 (defn example-problem []
@@ -30,7 +32,33 @@
 
 
 
+(defn parse-qaplib-problem [resource-path]
+  (let [contents (slurp (java.io/resource resource-path))
+        all-nums (->> (re-seq #"[\d.]+" contents)
+                      (map #(Integer/parseInt %)))
+        [[n] nums] (split-at 1 all-nums)
+        [as bs] (split-at (* n n) nums)
+        a (->> (partition n as)
+               (map vec)
+               vec)
+        b (->> (partition n bs)
+               (map vec)
+               vec)]
+    {:n n
+     :a a
+     :b b}))
+
 (comment
   (example-problem)
+
+  (-> (parse-qaplib-problem "qapdata/bur26a.dat")
+      )
+
+  (java.io/resource "qapdata/bur26a.dat")
+
+  (Integer/parseInt "06")
+
+  (re-seq #"[\d.]+" " 1  2\n\n dupa3 a2d333 44 5  06 ")
+
 
   )
