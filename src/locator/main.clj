@@ -32,19 +32,42 @@
                        (get-in b [(get s i) (get s j)]))))
                0)))
 
+(defn simulated-annealing [problem
+                           initial-solution
+                           initial-temp
+                           cooling-rate]
+  (loop [current-solution initial-solution
+         temp initial-temp]
+    (if (< temp 1)
+      current-solution
+      (let [current-energy (energy current-solution problem)
+            neighbor (gen-neighbor-solution current-solution)
+            neighbor-energy (energy neighbor problem)
+            next-temp (* temp (- 1 cooling-rate))]
+        (if (< neighbor-energy current-energy)
+          (recur neighbor next-temp)
+          (let [swap-proba (Math/exp (/ (- current-energy neighbor-energy)
+                                        temp))
+                draw (rand)]
+            (if (< draw swap-proba)
+              (recur neighbor next-temp)
+              (recur current-solution next-temp))))))))
+
+
 (defn -main []
   (println "hello!"))
 
 (comment
-  (+ 1 2)
-
-  (-> (shuffle (range 12))
-      println)
-
-  (swap-positions (vec (range 10)) 2 4)
-
   (energy (example-solution) (problem/example-problem))
 
   (gen-neighbor-solution [0 1 2 3])
+
+  (let [problem (problem/example-problem)
+        solution (simulated-annealing problem
+                                      (example-solution)
+                                      1000
+                                      0.001)
+        energy (energy solution problem)]
+    [solution energy])
 
   )
