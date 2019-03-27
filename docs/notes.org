@@ -1,0 +1,15 @@
+* neighbour solution generation
+
+
+s = [1 5 2 4 3]
+         |
+         i1
+         i2'
+
+* temperature
+
+  temp *= 1-cr
+
+  temp2 = temp1 * (1 - cr)
+  temp2 = (temp1 - temp1 * cr)
+  temp2 = temp1 - temp1 * cr

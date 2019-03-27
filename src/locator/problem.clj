@@ -48,10 +48,32 @@
      :a a
      :b b}))
 
+
+(defn read-team-members []
+  (-> (slurp (java.io/resource "lekta/team_members.txt"))
+      (str/split-lines)))
+
+(defn read-desks []
+  (-> (slurp (java.io/resource "lekta/desks.txt"))
+      (str/split-lines)))
+
+(defn interpret-solution [s names desks]
+  (map-indexed (fn [member-i desk-i]
+                 [(get names member-i) (get desks desk-i)])
+               s))
+
 (comment
   (-> (parse-qaplib-problem "qapdata/bur26a.dat")
       )
 
-  (java.io/resource "qapdata/bur26a.dat")
+  (read-team-members)
+
+  (read-desks)
+
+  (-> (interpret-solution [14 6 7 3 9 2 1 5 0 4 20 8 23 24 12 22 26 27 10 11 25 19 13 16 15 18 21 17]
+                      (read-team-members)
+                      (read-desks))
+      (println))
+
 
   )
