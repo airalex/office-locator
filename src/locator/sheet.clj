@@ -40,6 +40,35 @@
      :col-names all-labels
      :row-names all-labels}))
 
+(def required-tm-names
+  #{"Agnieszka"
+     "Alex"
+     "Arek"
+     "Dawid"
+     "Jakub"
+     "Joanna"
+     "Karolina"
+     "Katarzyna K."
+     "Katarzyna O."
+     "Klaudia"
+     "Marcin B."
+     "Marcin Z."
+     "Martyna"
+     "Mateusz P."
+     "Matt B."
+     "Michał"
+     "Norbert"
+     "Paweł"
+     "Piotr"
+     "Stanisław"
+     "Tomasz"
+     "Wojciech"})
+
+(defn parse-tm-s-rows [rows]
+  (let [df (sheet->indexed-df rows)]
+    (update df :row-names #(-> (into required-tm-names %)
+                               sort))))
+
 (defn transpose [rows]
   (apply map vector rows))
 
@@ -71,6 +100,13 @@
         (with-open [reader (io/reader path)]
           (-> (csv/read-csv reader)
               (parse-tm-tm-rows)
+              (indexed-df->rect-df :missing-fill 0))))
+      (clojure.pprint/pprint))
+
+  (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_S.csv")]
+        (with-open [reader (io/reader path)]
+          (-> (csv/read-csv reader)
+              (parse-tm-s-rows)
               (indexed-df->rect-df :missing-fill 0))))
       (clojure.pprint/pprint))
 
