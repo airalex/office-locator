@@ -10,26 +10,32 @@
             (repeat))
        (rest rows)))
 
+(defn sheet->indexed-df [rows]
+  (let [col-names (-> (first rows)
+                      (rest))
+        cells (->> (rest rows)
+                    (map (fn [[row-name & values]]
+                           (map-indexed (fn [val-i val]
+                                          (let [col-name (nth col-names val-i)]
+                                            [{:row row-name
+                                              :col col-name}
+                                             (Integer/parseInt val)]))
+                                        values)))
+                    (apply concat)
+                    (into {}))]
+    {:indexed-cells cells
+     :col-names col-names
+     :row-names (->> (rest rows)
+                     (map first))}))
+
 (defn parse-tm-tm-rows [rows]
-  (let [colleagues (-> (first rows)
-                       (rest))
-        respondents (-> (map first rows)
-                        (rest))
+  (let [{colleagues :col-names
+         respondents :row-names
+         cells :indexed-cells} (sheet->indexed-df rows)
         _ (assert (set/subset? (set respondents)
                                (set colleagues)))
-        cells (->> (rest rows)
-                   (map (fn [[respondent & scores]]
-                          (map-indexed (fn [score-i score]
-                                         (let [colleague (nth colleagues score-i)]
-                                           [{:row respondent
-                                             :col colleague}
-                                            (Integer/parseInt score)]))
-                                       scores)))
-                   (apply concat)
-                   (into {}))
         all-labels (-> (set/union (set colleagues) (set respondents))
-                       sort
-                       vec)]
+                       sort)]
     {:indexed-cells cells
      :col-names all-labels
      :row-names all-labels}))
