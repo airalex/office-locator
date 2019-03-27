@@ -11,15 +11,24 @@
        (rest rows)))
 
 (defn parse-tm-tm-rows [rows]
-  (let [rows (vec rows)
-        colleagues (-> (first rows)
+  (let [colleagues (-> (first rows)
                        (rest))
         respondents (-> (map first rows)
-                        (rest))]
-    (assert (set/subset? (set respondents)
-                         (set colleagues)))
-    {:cols colleagues
-     :rows respondents}))
+                        (rest))
+        _ (assert (set/subset? (set respondents)
+                               (set colleagues)))
+        cells (->> (rest rows)
+                   (map (fn [[respondent & scores]]
+                          (map-indexed (fn [score-i score]
+                                         (let [colleague (nth colleagues score-i)]
+                                           [{:row respondent
+                                             :col colleague}
+                                            (Integer/parseInt score)]))
+                                       scores)))
+                   (apply concat)
+                   (into {}))]
+    {:cells cells
+     :labels colleagues}))
 
 (comment
   (println "ab")
@@ -32,7 +41,6 @@
           (-> (csv/read-csv reader)
               (parse-tm-tm-rows))))
       (clojure.pprint/pprint))
-
 
   )
 
