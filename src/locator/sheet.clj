@@ -26,27 +26,32 @@
                                             (Integer/parseInt score)]))
                                        scores)))
                    (apply concat)
-                   (into {}))]
+                   (into {}))
+        all-labels (-> (set/union (set colleagues) (set respondents))
+                       sort
+                       vec)]
     {:indexed-cells cells
-     :labels colleagues}))
+     :col-names all-labels
+     :row-names all-labels}))
 
 (defn transpose [rows]
   (apply map vector rows))
 
 (defn indexed-df->rect-df [{:keys [indexed-cells
-                                   labels]}
+                                   col-names
+                                   row-names]}
                            & {:keys [missing-fill]}]
-  (let [sorted-labels (sort labels)
-        vals-cols (reduce (fn [matrix-acc col-name]
+  (let [vals-cols (reduce (fn [matrix-acc col-name]
                             (conj (vec matrix-acc)
                                   (reduce (fn [col-acc row-name]
                                             (conj col-acc
                                                   (get indexed-cells {:row row-name
                                                                       :col col-name} missing-fill)))
-                                          [] sorted-labels)))
-                          [] sorted-labels)]
-    {:cell-vals (transpose vals-cols)
-     :labels sorted-labels}))
+                                          [] row-names)))
+                          [] col-names)]
+    {:cell-vals (vec (transpose vals-cols))
+     :col-names col-names
+     :row-names row-names}))
 
 (comment
   (println "ab")
@@ -58,7 +63,7 @@
 
   (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_TM.csv")]
         (with-open [reader (io/reader path)]
-          (-> (take 10 (csv/read-csv reader))
+          (-> (csv/read-csv reader)
               (parse-tm-tm-rows)
               (indexed-df->rect-df :missing-fill 0))))
       (clojure.pprint/pprint))
