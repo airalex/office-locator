@@ -1,6 +1,6 @@
-(ns locator.problem
+(ns locator.qaplib
   (:require [clojure.java.io :as java.io]
-             [clojure.string :as str]))
+            [clojure.string :as str]))
 
 
 (defn example-problem []

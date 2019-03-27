@@ -1,5 +1,5 @@
 (ns locator.main
-  (:require [locator.problem :as problem]
+  (:require [locator.qaplib :as problem]
             [locator.sim-anneal :as sim-anneal]
             [locator.solution :as solution]))
 
