@@ -66,6 +66,7 @@
 
 (defn parse-tm-s-rows [rows]
   (let [df (sheet->indexed-df rows)]
+    (assert (:indexed-cells df))
     (update df :row-names #(-> (into required-tm-names %)
                                sort))))
 
@@ -82,9 +83,11 @@
                            {:x (Integer/parseInt x)
                             :y (Integer/parseInt y)
                             :name name})))
-        names (-> (map :name points)
-                  (sort)
-                  (vec))
+        names (->> (map #(Integer/parseInt (:name %))
+                        points)
+                   (sort)
+                   (map str)
+                   (vec))
         cells (->> (for [p1 points]
                      (for [p2 points]
                        [{:row (:name p1)
@@ -143,6 +146,30 @@
    :tm-s (read-tm-s-df)
    :tm-tm (read-tm-tm-df)})
 
+(defn read-problem []
+  (let [s-s-df (read-spot-positions-df)
+        tm-s-df (read-tm-s-df)
+        tm-tm-df (read-tm-tm-df)]
+    (assert (= (count (:row-names s-s-df))
+               (count (:col-names s-s-df))
+               (count (:row-names tm-s-df))
+               (count (:col-names tm-s-df))
+               (count (:row-names tm-tm-df))
+               (count (:col-names tm-tm-df)))
+            "Invalid rows/cols counts")
+    (assert (= (:row-names tm-s-df)
+               (:row-names tm-tm-df)
+               (:col-names tm-tm-df))
+            "Invalid team member names")
+    (assert (= (:col-names tm-s-df)
+               (:row-names s-s-df)
+               (:col-names s-s-df))
+            (str "Invalid spots names: "
+                 "[" (:col-names tm-s-df) "]"
+                 "[" (:row-names s-s-df) "]"
+                 "[" (:col-names s-s-df) "]"))))
+
+
 (comment
   (-> (read-spot-positions-df)
       (clojure.pprint/pprint))
@@ -157,6 +184,8 @@
 
   (-> (read-responses-dfs)
       (clojure.pprint/pprint))
+
+  (read-problem)
 
   )
 
