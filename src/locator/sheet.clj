@@ -116,28 +116,46 @@
      :col-names col-names
      :row-names row-names}))
 
+
+(defn read-spot-positions-df []
+  (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - Spot positions.csv")
+        contents (slurp path)]
+    (-> (csv/read-csv contents)
+        (parse-spot-positions)
+        (indexed-df->rect-df :missing-fill -1))))
+
+(defn read-tm-tm-df []
+  (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_TM.csv")]
+    (with-open [reader (io/reader path)]
+      (-> (csv/read-csv reader)
+          (parse-tm-tm-rows)
+          (indexed-df->rect-df :missing-fill 2)))))
+
+(defn read-tm-s-df []
+  (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_S.csv")]
+    (with-open [reader (io/reader path)]
+      (-> (csv/read-csv reader)
+          (parse-tm-s-rows)
+          (indexed-df->rect-df :missing-fill 2)))))
+
+(defn read-responses-dfs []
+  {:s-s (read-spot-positions-df)
+   :tm-s (read-tm-s-df)
+   :tm-tm (read-tm-tm-df)})
+
 (comment
-  (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - Spot positions.csv")
-            contents (slurp path)]
-        (-> (csv/read-csv contents)
-            (parse-spot-positions)
-            (indexed-df->rect-df :missing-fill -1)))
+  (-> (read-spot-positions-df)
       (clojure.pprint/pprint))
 
   (transpose [[1 2] [3 4]])
 
-  (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_TM.csv")]
-        (with-open [reader (io/reader path)]
-          (-> (csv/read-csv reader)
-              (parse-tm-tm-rows)
-              (indexed-df->rect-df :missing-fill 0))))
+  (-> (read-tm-tm-df)
       (clojure.pprint/pprint))
 
-  (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - TM_S.csv")]
-        (with-open [reader (io/reader path)]
-          (-> (csv/read-csv reader)
-              (parse-tm-s-rows)
-              (indexed-df->rect-df :missing-fill 0))))
+  (-> (read-tm-s-df)
+      (clojure.pprint/pprint))
+
+  (-> (read-responses-dfs)
       (clojure.pprint/pprint))
 
   )
