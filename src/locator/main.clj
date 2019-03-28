@@ -22,14 +22,14 @@
      :interpreted (solution/interpret-solution solution problem)}))
 
 (comment
-  (-> (let [problem (qaplib/parse-qaplib-problem "qapdata/nug20.dat")
+  #_(-> (let [problem (qaplib/parse-qaplib-problem "qapdata/nug20.dat")
             solution (sim-anneal/run problem 1000 0.001)
             cost (solution/cost solution problem)]
         {:best solution
          :cost cost})
       (println))
 
-  (-> (let [problem (qaplib/parse-qaplib-problem "lekta/hardcoded.dat")
+  #_(-> (let [problem (qaplib/parse-qaplib-problem "lekta/hardcoded.dat")
             solution (sim-anneal/run problem 1000 0.001)
             cost (solution/cost solution problem)]
         {:best solution
@@ -37,15 +37,22 @@
       (println))
 
 
-  (clojure.pprint/pprint (run-once))
+  #_(clojure.pprint/pprint (run-once))
 
   (def results-store (duratom/duratom :local-file
                                       :file-path "results.edn"
                                       :init []))
 
-  (dotimes [_ 10]
+  (dotimes [_ 30]
     (let [result (run-once)]
       (clojure.pprint/pprint (select-keys result [:cost :interpreted]))
       (swap! results-store conj result)))
+
+  (do
+    (println "best results:")
+    (clojure.pprint/pprint
+     (->> (sort-by :cost @results-store)
+          (take 4)
+          (map (fn [result] (select-keys result [:interpreted :cost]))))))
 
   )
