@@ -141,11 +141,6 @@
           (parse-tm-s-rows)
           (indexed-df->rect-df :missing-fill 2)))))
 
-(defn read-responses-dfs []
-  {:s-s (read-spot-positions-df)
-   :tm-s (read-tm-s-df)
-   :tm-tm (read-tm-tm-df)})
-
 (defn read-problem []
   (let [s-s-df (read-spot-positions-df)
         tm-s-df (read-tm-s-df)
@@ -167,7 +162,13 @@
             (str "Invalid spots names: "
                  "[" (:col-names tm-s-df) "]"
                  "[" (:row-names s-s-df) "]"
-                 "[" (:col-names s-s-df) "]"))))
+                 "[" (:col-names s-s-df) "]"))
+    {:n (count (:row-names s-s-df))
+     :a (:cell-vals tm-tm-df)
+     :b (:cell-vals s-s-df)
+     :c (:cell-vals tm-s-df)
+     :a-labels (:row-names tm-s-df)
+     :b-labels (:col-names tm-s-df)}))
 
 
 (comment
@@ -182,10 +183,8 @@
   (-> (read-tm-s-df)
       (clojure.pprint/pprint))
 
-  (-> (read-responses-dfs)
+  (-> (read-problem)
       (clojure.pprint/pprint))
-
-  (read-problem)
 
   )
 
