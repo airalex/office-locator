@@ -69,6 +69,15 @@
     (update df :row-names #(-> (into required-tm-names %)
                                sort))))
 
+(defn parse-spot-positions [rows]
+  (let [points (->> (rest rows)
+                    (map (fn [[name x y]]
+                           {:x (Integer/parseInt x)
+                            :y (Integer/parseInt y)
+                            :name name})))]
+    points))
+
+
 (defn transpose [rows]
   (apply map vector rows))
 
@@ -89,10 +98,11 @@
      :row-names row-names}))
 
 (comment
-  (println "ab")
-
-  (-> (csv/read-csv "a,b,c\n1,2,3\n4,5,6")
-      (csv-rows->maps))
+  (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - Spot positions.csv")
+            contents (slurp path)]
+        (-> (csv/read-csv contents)
+            (parse-spot-positions)))
+      (clojure.pprint/pprint))
 
   (transpose [[1 2] [3 4]])
 
