@@ -57,7 +57,7 @@
   (-> (slurp (java.io/resource "lekta/desks.txt"))
       (str/split-lines)))
 
-(defn interpret-solution [s names desks]
+#_(defn interpret-solution [s names desks]
   (map-indexed (fn [member-i desk-i]
                  [(get names member-i) (get desks desk-i)])
                s))
