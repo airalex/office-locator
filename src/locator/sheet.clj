@@ -14,15 +14,15 @@
   (let [col-names (-> (first rows)
                       (rest))
         cells (->> (rest rows)
-                    (map (fn [[row-name & values]]
-                           (map-indexed (fn [val-i val]
-                                          (let [col-name (nth col-names val-i)]
-                                            [{:row row-name
-                                              :col col-name}
-                                             (Integer/parseInt val)]))
-                                        values)))
-                    (apply concat)
-                    (into {}))]
+                   (map (fn [[row-name & values]]
+                          (map-indexed (fn [val-i val]
+                                         (let [col-name (nth col-names val-i)]
+                                           [{:row row-name
+                                             :col col-name}
+                                            (Integer/parseInt val)]))
+                                       values)))
+                   (apply concat)
+                   (into {}))]
     {:indexed-cells cells
      :col-names col-names
      :row-names (->> (rest rows)
@@ -69,13 +69,32 @@
     (update df :row-names #(-> (into required-tm-names %)
                                sort))))
 
+(defn carthesian-dist [{x1 :x, y1 :y}
+                       {x2 :x, y2 :y}]
+  (let [dx (- x2 x1)
+        dy (- y2 y1)]
+    (Math/sqrt (+ (* dx dx)
+                  (* dy dy)))))
+
 (defn parse-spot-positions [rows]
   (let [points (->> (rest rows)
                     (map (fn [[name x y]]
                            {:x (Integer/parseInt x)
                             :y (Integer/parseInt y)
-                            :name name})))]
-    points))
+                            :name name})))
+        names (-> (map :name points)
+                  (sort)
+                  (vec))
+        cells (->> (for [p1 points]
+                     (for [p2 points]
+                       [{:row (:name p1)
+                         :col (:name p2)}
+                        (carthesian-dist p1 p2)]))
+                   (apply concat)
+                   (into {}))]
+    {:indexed-cells cells
+     :col-names names
+     :row-names names}))
 
 
 (defn transpose [rows]
@@ -101,7 +120,8 @@
   (-> (let [path (io/resource "responses/Jak skutecznie miejsca (Responses) - Spot positions.csv")
             contents (slurp path)]
         (-> (csv/read-csv contents)
-            (parse-spot-positions)))
+            (parse-spot-positions)
+            (indexed-df->rect-df :missing-fill -1)))
       (clojure.pprint/pprint))
 
   (transpose [[1 2] [3 4]])
